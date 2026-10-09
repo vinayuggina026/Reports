@@ -5,7 +5,8 @@ import {
   Route,
   Link,
   Navigate,
-  useParams
+  useParams,
+  useNavigate
 } from "react-router-dom";
 
 // Home Page
@@ -41,16 +42,29 @@ function Contact() {
   return <h2>Contact Page</h2>;
 }
 
-// Login Page
-function Login({ setLoggedIn }) {
+// Login and Logout Page
+function Login({ loggedIn, setLoggedIn }) {
+  const navigate = useNavigate();
+
   const handleLogin = () => {
     setLoggedIn(true);
+    navigate("/cart");
+  };
+
+  const handleLogout = () => {
+    setLoggedIn(false);
+    navigate("/");
   };
 
   return (
     <div>
-      <h2>Login Page</h2>
-      <button onClick={handleLogin}>Login</button>
+      <h2>{loggedIn ? "Welcome!" : "Login Page"}</h2>
+
+      {loggedIn ? (
+        <button onClick={handleLogout}>Logout</button>
+      ) : (
+        <button onClick={handleLogin}>Login</button>
+      )}
     </div>
   );
 }
@@ -63,7 +77,7 @@ function Cart() {
 // Protected Route
 function ProtectedRoute({ loggedIn, children }) {
   if (!loggedIn) {
-    return <Navigate to="/login" />;
+    return <Navigate to="/login" replace />;
   }
 
   return children;
@@ -75,10 +89,12 @@ function NotFound() {
     <div>
       <h2>404 Page Not Found</h2>
       <p>Invalid URL</p>
+      <Link to="/">Go to Home</Link>
     </div>
   );
 }
 
+// Main App
 function App() {
   const [loggedIn, setLoggedIn] = useState(false);
 
@@ -90,7 +106,9 @@ function App() {
         <Link to="/products/101">Product Details</Link> |{" "}
         <Link to="/cart">Cart</Link> |{" "}
         <Link to="/contact">Contact</Link> |{" "}
-        <Link to="/login">Login</Link>
+        <Link to="/login">
+          {loggedIn ? "Account / Logout" : "Login"}
+        </Link>
       </nav>
 
       <hr />
@@ -108,9 +126,15 @@ function App() {
 
         <Route path="/contact" element={<Contact />} />
 
+        {/* Login and Logout */}
         <Route
           path="/login"
-          element={<Login setLoggedIn={setLoggedIn} />}
+          element={
+            <Login
+              loggedIn={loggedIn}
+              setLoggedIn={setLoggedIn}
+            />
+          }
         />
 
         {/* Protected Route */}
